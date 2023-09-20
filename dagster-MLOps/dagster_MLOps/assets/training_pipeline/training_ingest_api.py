@@ -73,12 +73,17 @@ def fetch_training_data_from_api(context:AssetExecutionContext) -> None:
 
 
 @asset(deps=[fetch_training_data_from_api])
-def save_training_data_duckdb(duckdb: DuckDBResource) -> None:
+def save_training_data_duckdb(
+    # duckdb: DuckDBResource
+    ) -> None:
     training_df = pd.read_json("./training_data/2020-06-30_2022-01-01.json")
-    with duckdb.get_connection() as conn:
-        conn.execute("CREATE TABLE training.training_dataset AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM training_df")
+    # with duckdb.get_connection() as conn:
+    #     conn.execute("CREATE TABLE training.training_dataset AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM training_df")
 
 @asset(deps=[save_training_data_duckdb])
-def training_dataset(duckdb: DuckDBResource) -> pd.DataFrame:
-    with duckdb.get_connection() as conn:
-        return conn.execute("SELECT * from training.training_dataset").fetch_df()
+def training_dataset(
+    # duckdb: DuckDBResource
+    ) -> pd.DataFrame:
+    # with duckdb.get_connection() as conn:
+    #     return conn.execute("SELECT * from training.training_dataset").fetch_df()
+    return 0

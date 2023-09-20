@@ -5,7 +5,7 @@ from dagster import (
     AssetExecutionContext, 
     MetadataValue
 )
-from dagster_duckdb import DuckDBResource
+# from dagster_duckdb import DuckDBResource
 
 ''' this asset takes predicted consumption rate and validate it against real values
     - Prediction takes place before the start of the date (at 9pm previous day etc)
@@ -24,7 +24,9 @@ Run everyday prediction based on stored features and registered model
 
 ## need to change this to self populate daily dataset
 @asset
-def feature_engineered_daily_data(tbd) -> pd.DataFrame:
+def feature_engineered_daily_data(
+    # tbd
+    ) -> pd.DataFrame:
     df_feature_engineered = tbd
 
     # Change hour column to datetime dtype
@@ -62,19 +64,26 @@ def transformed_daily_data(feature_engineered_daily_data, scaler, encoder) -> pd
 
 # use registered model
 @asset
-def daily_new_prediction(transformed_daily_data, tbd):
+def daily_new_prediction(transformed_daily_data
+                        #  , tbd
+                         ):
     inference_X = transformed_daily_data
     model = tbd
 
     return model.predict(inference_X)
 
 @asset
-def save_daily_prediction(duckdb: DuckDBResource, transformed_daily_data, daily_new_prediction, last_run_date) -> None:
+def save_daily_prediction(
+    # duckdb: DuckDBResource, 
+    transformed_daily_data, 
+    daily_new_prediction, 
+    fetch_daily_data_from_api
+    ) -> None:
     inference_X = transformed_daily_data
-    last_run_date = last_run_date
+    last_run_date = fetch_daily_data_from_api
 
     predicted_y = pd.DataFrame(daily_new_prediction)
     new_predictions_df = pd.concat([inference_X, predicted_y], axis=1)
 
-    with duckdb.get_connection() as conn:
-        conn.execute(f"CREATE TABLE dailypred.{last_run_date}_predictions AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM new_predictions_df")
+    # with duckdb.get_connection() as conn:
+    #     conn.execute(f"CREATE TABLE dailypred.{last_run_date}_predictions AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM new_predictions_df")

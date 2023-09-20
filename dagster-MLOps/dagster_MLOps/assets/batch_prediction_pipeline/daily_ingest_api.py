@@ -4,11 +4,17 @@ from datetime import datetime, timedelta
 from dagster import (
     asset, 
     AssetExecutionContext, 
-    MetadataValue
+    MetadataValue,
+    AssetOut
+
 )
+import os
+import json
 from dagster_duckdb import DuckDBResource
 
-@asset(outs= {'last_run_date': AssetOut()})
+@asset(
+        # outs = {'last_run_date': AssetOut()}
+        )
 def fetch_daily_data_from_api(context:AssetExecutionContext) -> str:
     '''
     Get daily data starting from 2022-01-01 to make batch prediction
@@ -50,14 +56,18 @@ def fetch_daily_data_from_api(context:AssetExecutionContext) -> str:
     return last_run_date_str
 
 @asset
-def save_daily_data_duckdb(duckdb: DuckDBResource, last_run_date) -> None:
-    last_run_date = last_run_date
+def save_daily_data_duckdb(
+    # duckdb: DuckDBResource, 
+                           fetch_daily_data_from_api) -> None:
+    last_run_date = fetch_daily_data_from_api
     daily_df = pd.read_json(f"./daily_data/{last_run_date}.json")
-    with duckdb.get_connection() as conn:
-        conn.execute(f"CREATE TABLE daily.{last_run_date}_data AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM daily_df")
+    # with duckdb.get_connection() as conn:
+    #     conn.execute(f"CREATE TABLE daily.{last_run_date}_data AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM daily_df")
     
 @asset
-def daily_dataset(duckdb: DuckDBResource, last_run_date) -> pd.DataFrame:
-    last_run_date = last_run_date
-    with duckdb.get_connection() as conn:
-        return conn.execute(f"SELECT * from daily.{last_run_date}_data").fetch_df()
+def daily_dataset(
+    # duckdb: DuckDBResource, 
+    fetch_daily_data_from_api) -> pd.DataFrame:
+    last_run_date = fetch_daily_data_from_api
+    # with duckdb.get_connection() as conn:
+    #     return conn.execute(f"SELECT * from daily.{last_run_date}_data").fetch_df()
