@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 from dagster import (
+    AssetIn,
     asset, 
     AssetExecutionContext, 
     MetadataValue
 )
-# from dagster_duckdb import DuckDBResource
+from dagster_duckdb import DuckDBResource
 
 ''' this asset takes predicted consumption rate and validate it against real values
     - Prediction takes place before the start of the date (at 9pm previous day etc)
@@ -72,18 +73,14 @@ def daily_new_prediction(transformed_daily_data
 
     return model.predict(inference_X)
 
-@asset
-def save_daily_prediction(
-    # duckdb: DuckDBResource, 
-    transformed_daily_data, 
-    daily_new_prediction, 
-    fetch_daily_data_from_api
-    ) -> None:
+@asset(ins={"last_run_date": AssetIn("fetch_daily_data_from_api")})
+def save_daily_prediction(duckdb: DuckDBResource, transformed_daily_data, daily_new_prediction, last_run_date) -> None:
+    last_run_date = last_run_date
     inference_X = transformed_daily_data
-    last_run_date = fetch_daily_data_from_api
 
     predicted_y = pd.DataFrame(daily_new_prediction)
     new_predictions_df = pd.concat([inference_X, predicted_y], axis=1)
 
-    # with duckdb.get_connection() as conn:
-    #     conn.execute(f"CREATE TABLE dailypred.{last_run_date}_predictions AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM new_predictions_df")
+    with duckdb.get_connection() as conn:
+        conn.execute("USE dailypred")
+        conn.execute(f"CREATE TABLE dailypred.{last_run_date}_predictions AS SELECT HourDK, PriceArea, ConsumerType_DE35, TotalCon FROM new_predictions_df")
