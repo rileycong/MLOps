@@ -13,12 +13,12 @@ batch_prediction_assets = load_assets_from_package_module(batch_prediction_pipel
 
 # scheduled daily prediction
 batch_prediction_job = define_asset_job("batch_prediction_job", AssetSelection.groups("batch_prediction_pipeline"))
-# daily_prediction_schedule = ScheduleDefinition(job=batch_prediction_job, cron_schedule="0 9 * * *")
+daily_prediction_schedule = ScheduleDefinition(job=batch_prediction_job, cron_schedule="0 9 * * *")
 
-@schedule(job=batch_prediction_job, cron_schedule="0 9 * * *")
-def batch_prediction_schedule(
-):
-    pass
+# @schedule(job=batch_prediction_job, cron_schedule="0 9 * * *")
+# def batch_prediction_schedule(
+# ):
+#     pass
     
 defs = Definitions(
     assets= [*model_training_assets, *batch_prediction_assets],
@@ -37,5 +37,5 @@ defs = Definitions(
 
     #     ),
     # },
-    schedules=[batch_prediction_schedule]
+    schedules=[daily_prediction_schedule]
 )
