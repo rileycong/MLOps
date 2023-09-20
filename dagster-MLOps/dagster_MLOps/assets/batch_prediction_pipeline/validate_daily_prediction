@@ -1,0 +1,11 @@
+from sklearn.metrics import mean_squared_error
+from dagster import asset, AssetExecutionContext
+
+@asset
+def validate_new_prediction(context: AssetExecutionContext, daily_new_prediction, daily_dataset):
+    predicted_y = daily_new_prediction
+    real_y = daily_dataset.TotalCon.toarray()
+
+    mse_score = mean_squared_error(predicted_y, real_y)
+
+    context.metadata["mse_score"] = str(mse_score)

@@ -19,10 +19,11 @@ def gradientboost_model(transformed_training_data):
 def rfr_model_performance(context:AssetExecutionContext, transformed_test_data, randomforest_model):
     transformed_X_test, transformed_y_test = transformed_test_data
     score = randomforest_model.score(transformed_X_test, transformed_y_test)
+    params = randomforest_model.get_params().json()
     
     context.add_output_metadata({
         "model": "random forest regressor",
-        "params": MetadataValue.__dict__(randomforest_model.get_params()),
+        "params": MetadataValue.json(params),
         "R squared": MetadataValue.float(score)
     })
 
@@ -32,10 +33,11 @@ def rfr_model_performance(context:AssetExecutionContext, transformed_test_data, 
 def gbr_model_performance(context:AssetExecutionContext, transformed_test_data, gradientboost_model):
     transformed_X_test, transformed_y_test = transformed_test_data
     score = gradientboost_model.score(transformed_X_test, transformed_y_test)
-    
+    params = gradientboost_model.get_params().json()
+
     context.add_output_metadata({
         "model": "gradient boost regressor",
-        "params": MetadataValue.__dict__(gradientboost_model.get_params()),
+        "params": MetadataValue.json(params),
         "R squared": MetadataValue.float(score)
     })
 

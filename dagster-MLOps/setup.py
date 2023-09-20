@@ -4,11 +4,13 @@ setup(
     name="dagster_MLOps",
     packages=find_packages(exclude=["dagster_MLOps_tests"]),
     install_requires=[
-        "dagster",
+        "dagster==1.4.12",
         "dagster-cloud",
         "pandas",
         "requests",
         "scikit-learn",
-    ],
-    extras_require={"dev": ["dagster-webserver", "pytest"]},
+        "dagster-duckdb==0.20.12",
+        "dagster-webserver==1.4.12",
+        "pytest"
+    ]
 )
